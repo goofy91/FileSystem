@@ -2,31 +2,36 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-
 #include "FileSystem.h";
-#include "FlashDriver.h";
+#include "util/util.h"
 static FlashDriver& fd=(FlashDriver::instance());
 FileSystem::FileSystem(){
 }
+bool FileSystem::checkBlank(unsigned int from,unsigned int to){
+    while(from<=to){
+        if(*((unsigned int *)from)!=FS_BLANK)
+            return false;
+        from+=sizeof(unsigned int);
+    }
+    return true;
+}
 int FileSystem::open(const char* filename, int flags, int size){
-    if(flags==O_CREAT){//we have to create the file
-        //first let's check the filename size:
+     //first of all check the length of the filename
+     if(strlen(filename)>FS_FILE_NAME_MAX_LENGHT){
+        errno=-ENAMETOOLONG;
+        return -1;
+    }
+    if(flags==(O_CREAT | O_WRONLY)){//create and write
         int i;
         Header newHeader;
         for(i=0;i<FS_FILE_NAME_MAX_LENGHT && filename[i] !='\0';i++)
             newHeader.filename[i]=filename[i];
         for(;i<FS_FILE_NAME_MAX_LENGHT;i++)
             newHeader.filename[i]='\0';
-        if(newHeader.filename[FS_FILE_NAME_MAX_LENGHT-1]!='\0'){
-            errno=-ENAMETOOLONG;
-            return -1;//filename too long
-        }
-        //TODO: check if there's enought space!
-        //TODO: check if there's a file with the same name!
-        //ok, all checked, let's write it down (FS without wholes!!!! ALL FILES ARE CONTIGUOS)
+        //(FS without wholes!!!! ALL FILES ARE CONTIGUOS)
         //first set up the header
         newHeader.next=FS_BLANK;//newest file has next field with all 1
-        newHeader.size=size+ALIGMENT-size%ALIGMENT;
+        newHeader.size=size+(ALIGMENT-(size%ALIGMENT));
         newHeader.flag1=0xABCDEF12;//???TOASK
         newHeader.flag2=0x12345678;//???TOASK
         //header done
@@ -43,19 +48,25 @@ int FileSystem::open(const char* filename, int flags, int size){
             while((*(unsigned int *)address)!=FS_BLANK){//reach the newest file in the list
                 address=*(unsigned int *)address;
             }
-            //now write the pointer of the new file (which is up on the old one)
-            fd.write(address,address+(*(unsigned int *)((unsigned int)address+sizeof(unsigned int))+sizeof(Header)));
-            address=*(unsigned int *)address;
+            Header header=readHeader(address);
+            //check if there's space upon the newest file!
+            if(((header.size+address+sizeof(Header))+newHeader.size+sizeof(Header)<FS_ADDR_ROOF)
+                    && checkBlank(header.size+address+sizeof(Header),newHeader.size+sizeof(Header)+address) ){
+                //if we haven't reach the roof yet and
+                //if the space is actually blank
+                //now write the pointer of the new file (which is up on the old one)
+                fd.write(address,address + header.size+sizeof(Header));
+                address=*(unsigned int *)address;
+            }
+            else{//find wholes!!!!!
+                //TODO!!!!!!
+                //REMEBER: save the address to put the new file in address!!!!
+            }
         }
         //now address points to the first free area:
         return writeHeader(address,newHeader);
     }
     else if(flags==O_RDONLY){//we have to read the file
-        //ensure the lenght of filename
-        if(strlen(filename)>FS_FILE_NAME_MAX_LENGHT){
-            errno=-ENAMETOOLONG;
-            return -1;
-        }
         //search for this file address:
         unsigned int address=getAddress(filename);
         if(address==FS_BLANK){//if the filename doesn't exist
@@ -65,11 +76,23 @@ int FileSystem::open(const char* filename, int flags, int size){
         return  address;
         
     }
+    else if(flags== O_WRONLY){//only write without creating it.
+        unsigned int address=getAddress(filename);
+        if(address==FS_BLANK){//if the filename doesn't exist
+            errno=-ENOENT;
+            return -1;
+        }
+        //search the first space blank of the file:
+        Header header=readHeader(address);
+        address+=sizeof(Header);//point to the first byte of the file
+        
+        return open(filename,O_WRONLY | O_CREAT,size); //TO ASK!!!!!!!
+    }
     return -1;
 }
 
 int FileSystem::lstat(char* filename, struct stat* buf){
-    //check the lenght
+    //check the length
     if(strlen(filename)>FS_FILE_NAME_MAX_LENGHT){
             errno=-ENAMETOOLONG;
             return -1;
@@ -166,14 +189,31 @@ FileSystem& FileSystem::instance(){
 }
 
 unsigned int FileSystem::getAddress(const char* filename){
-    unsigned int address=FS_ADDR_ROOT;//set the address to the root of the FS
     Header header;
+    if(*(unsigned int *)(FS_ADDR_ROOT)==FS_BLANK)//if there's no root!
+        return FS_BLANK;
+    unsigned int address=*(unsigned int *)(FS_ADDR_ROOT);
+    do{
+    header=readHeader(address);//header of the first file
+    if(strcmp(filename,header.filename)==0)
+            return address;
+    address=(header.next);
+    }while(address!=FS_BLANK);
+    return FS_BLANK;
+}
+unsigned int FileSystem::getAddressBefore(const char* filename){
+    Header header;
+    if(*(unsigned int *)(FS_ADDR_ROOT)==FS_BLANK)//if there's no root!
+        return FS_BLANK;
+    unsigned int address=FS_ADDR_ROOT;
     do{
         header=readHeader(*(unsigned int *)address);
         if(strcmp(filename,header.filename)==0)
-            return *(unsigned int *)address;
-    }while((*(unsigned int *)address)!=FS_BLANK);
+            return address;
+        address=*(unsigned int *)address;
+    }while(address!=FS_BLANK);
     return FS_BLANK;
+    
 }
 int FileSystem::unlink(const char* filename){
     //is pathname empty?
@@ -188,53 +228,95 @@ int FileSystem::unlink(const char* filename){
         return -1;
     }
     //check the file if exist!
+    if(findFile(filename)==false){//if the filename doesn't exist
+        errno=-ENOENT;
+        return -1;
+    }
     //there's the root, so point to the first file:
     address=*(unsigned int *)address;
     Header header;
     if((*(unsigned int *)address)==FS_BLANK){//there's only one file!
         header=readHeader(address);
-        if(strcmp(filename,header.filename)==0){
             //if is the file to delete then delete only the root
             if(fd.erase(fd.getSectorNumber(FS_ADDR_ROOT))==false){
                 errno=-EIO;
                 return -1;
             }
+            //if the file to unlink and the root aren't in the same sector, then erase both sectors
+            if((address & ADDR_FLASH_SECTOR_MASK) != FS_ADDR_ROOT){
+                if(fd.erase(fd.getSectorNumber(address & ADDR_FLASH_SECTOR_MASK))==false){
+                        errno=-EIO;
+                        return -1;
+                }
+            }
             return 0;//there was only one file, we have delete the sector containing the root
-        }
-        else{
-            errno=-ENOENT;
-            return -1;//there's no such file
-        }
-    }
-    address=getAddress(filename);
-    if(address==FS_BLANK){//if the filename doesn't exist
-        errno=-ENOENT;
-        return -1;
-    }
+        
+    } 
+    address=getAddressBefore(filename);
+    unsigned int addressFileToDelete=*(unsigned int *)address;
+    Header headerFileToDelete=readHeader(addressFileToDelete);
+
     //TODO!!! check the permissions!!!
-    unsigned int sector[SECTOR_SIZE];
-    header=readHeader(address);
-    header.next=*(unsigned int *)address;
-    //save the sector
-    for(unsigned int i=0;i<SECTOR_SIZE;i++){
-        sector[i]=*(unsigned int *)((address & ADDR_FLASH_SECTOR_MASK)+sizeof(unsigned int)*i);
+    if((addressFileToDelete & ADDR_FLASH_SECTOR_MASK )==(address & ADDR_FLASH_SECTOR_MASK)){
+        //if the file before and the file to unlink are in the same sector then:
+        //erase the buffer sector:
+        if(fd.erase(FS_SECTOR_BUFFER)==false){
+            errno=-EIO;
+            return -1;
+        }
+        //copy the whole sector (except the file to delete) to the buffer sector:
+        unsigned int i=0;
+        while(i<SECTOR_SIZE){
+            if(i+(address & ADDR_FLASH_SECTOR_MASK)==addressFileToDelete)
+                i+=headerFileToDelete.size+sizeof(header);
+            else if(i+(address & ADDR_FLASH_SECTOR_MASK)==address){
+                if(fd.write(FS_ADDR_BUFFER+i,headerFileToDelete.next)==false){
+                    errno=-EIO;
+                    return -1;
+                }
+                i+=ALIGMENT;
+            }
+            else{
+                if(fd.write(FS_ADDR_BUFFER+i,*(unsigned int *)(i+(address & ADDR_FLASH_SECTOR_MASK)))==false){
+                    errno=-EIO;
+                    return -1;
+                }
+                i+=ALIGMENT;
+            }
+        }
+        
     }
-    
+    else{//if the file to unlink and the file before aren't in the same sector:
+        //save the whole sector where the file before is
+        unsigned int i=0;
+        while(i<SECTOR_SIZE){
+            if(i+(address & ADDR_FLASH_SECTOR_MASK)==address){
+                if(fd.write(FS_ADDR_BUFFER+i,headerFileToDelete.next)==false){
+                    errno=-EIO;
+                    return -1;
+                }
+                i+=ALIGMENT;
+            }
+            else{
+                if(fd.write(FS_ADDR_BUFFER+i,*(unsigned int *)(i+(address & ADDR_FLASH_SECTOR_MASK)))==false){
+                    errno=-EIO;
+                    return -1;
+                }
+                i+=ALIGMENT;
+            }
+        }
+    }
     //erase sector!
     if(fd.erase(fd.getSectorNumber(address))==false){
         errno=-EIO;
         return -1;
     }
-    for(unsigned int i=0;i<SECTOR_SIZE;i++){
-        if((address & ADDR_FLASH_SECTOR_MASK)+sizeof(unsigned int)*i!=address){
-                fd.write((address & ADDR_FLASH_SECTOR_MASK)+sizeof(unsigned int)*i,sector[i]);
-        }
-        else{
-            fd.write(address,header.next);
-        }
+    //and then copy it back!
+    if(fd.write(address & ADDR_FLASH_SECTOR_MASK,(char *)(FS_ADDR_BUFFER),SECTOR_SIZE)==false){
+        errno=-EIO;
+        return -1;
     }
-    
-    return 1;
+    return 0;
     
 }
 /*
@@ -251,4 +333,3 @@ bool FileSystem::findFile(const char *filename){
     }
     return false;
 }
-

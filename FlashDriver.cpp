@@ -72,14 +72,13 @@ bool FlashDriver::erase()
     lock();
     return true;
 }
-/**
- *
- * TODO CHECK THIS ONE!!!!!
- */
+
 bool FlashDriver::write(unsigned int address, char *data, size_t count){
     for(int i=0;i<count;i++){
-        if(write(address+i,*(data+i))==false)
-            return false;
+        if(*(data+i)!=0xFF){//if it's clear don't write
+            if(write(address+i,*(data+i))==false)
+                return false;
+        }
     }
     return true;
 }

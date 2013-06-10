@@ -38,9 +38,9 @@
 #define ADDR_FLASH_SECTOR_9     ((unsigned int)0x080A0000) /* Base @ of Sector 9, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_10    ((unsigned int)0x080C0000) /* Base @ of Sector 10, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_11    ((unsigned int)0x080E0000) /* Base @ of Sector 11, 128 Kbytes */
-#define ADDR_FLASH_SECTOR_MASK  ((unsigned int)0x080E0000) //mask for find out what sector belongs a certaim address
+#define ADDR_FLASH_SECTOR_MASK  ((unsigned int)0x080E0000) //mask for find out what sector belongs a certain address
 
-#define SECTOR_SIZE     ((unsigned int)0x20000) //each sector is 128 KB
+#define SECTOR_SIZE     ((unsigned int)0x00020000) //each sector is 128 KB
 //KEYS:
 #define FLASH_OPTKEY1 ((unsigned int) 0x08192A3B)
 #define FLASH_OPTKEY2 ((unsigned int) 0x4C5D6E7F)

@@ -9,13 +9,16 @@
 #ifndef FILESYSTEM_H
 #define	FILESYSTEM_H
 
-#define ALIGMENT 8//in byte
-//ATTENTION size of the filename lenght field must be divisible for 2
-#define FS_FILE_NAME_MAX_LENGHT 24//3*ALIGMENT in bytes
+#define ALIGMENT 4//in byte
+//ATTENTION size of the filename length field must be divisible for 2
+#define FS_FILE_NAME_MAX_LENGHT 24//6*ALIGMENT in bytes
 #define FS_ADDR_ROOT ADDR_FLASH_SECTOR_8
-#define FS_ADDR_ROOF ADDR_FLASH_SECTOR_11
-#define FS_SECTOR_ROOT 8
-#define FS_SECTOR_ROOF 11
+#define FS_ADDR_ROOF ADDR_FLASH_SECTOR_10
+#define FS_ADDR_BUFFER ADDR_FLASH_SECTOR_11
+
+#define FS_SECTOR_ROOT 4
+#define FS_SECTOR_ROOF 10
+#define FS_SECTOR_BUFFER 11
 #define FS_ROOT_DIM ALIGMENT
 #define FS_BLANK (unsigned int)0xFFFFFFFF
 //HEADER STRUCT!
@@ -79,6 +82,21 @@ private:
      * @return The address of the filename, FS_BLANK if the file doesn't exist
      */
     unsigned int getAddress(const char* filename);
+    /**
+     * 
+     * @param filename to find
+     * @return The address of the file before the input filename, FS_BLANK if the file doesn't exist
+     */
+    unsigned int getAddressBefore(const char* filename);
+    
+    /**
+     * Check if from the address "from" to the address "to" the bits are blank
+     * @param from address
+     * @param to address
+     * @return true if the whole space is blank, otherwise false
+     */
+    bool checkBlank(unsigned int from,unsigned int to);
+
 
     
 };

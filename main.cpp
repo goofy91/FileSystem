@@ -188,17 +188,17 @@ void testFile01(){
          return;
      }
            }
-    {
+    if(a=='!'){
     int fd=fs.open("File01",O_CREAT | O_WRONLY,80);
     File* file=new File(fd,80);
     file->write(fd,"Contenuto",9);
     }
-    {
+    if(a=='"'){
         int fd=fs.open("File02",O_CREAT | O_WRONLY,80);
     File* file=new File(fd,80);
     file->write(fd,"Ciao, questo è il mio file",27);
     }
-    {
+    if(a=='p'){
         int fd=fs.open("File03",O_CREAT | O_WRONLY,80);
     File* file=new File(fd,80);
     file->write(fd,"CIAOCIAO",8);
