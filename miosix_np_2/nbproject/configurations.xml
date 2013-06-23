@@ -394,7 +394,6 @@
         <in>miosix.h</in>
       </df>
       <in>Common.h</in>
-      <in>File.h</in>
       <in>FileSystem.cpp</in>
       <in>FileSystem.h</in>
       <in>main.cpp</in>
@@ -464,8 +463,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1534,8 +1531,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2607,8 +2602,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -3678,8 +3671,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -4751,8 +4742,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -5822,8 +5811,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -6895,8 +6882,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -7964,8 +7949,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -9035,8 +9018,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -10104,8 +10085,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -11175,8 +11154,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -12245,8 +12222,6 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
@@ -13314,8 +13289,6 @@
         </makeTool>
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../File.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>

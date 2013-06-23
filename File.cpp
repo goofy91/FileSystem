@@ -3,10 +3,12 @@
 static FlashDriver& flashDriver=FlashDriver::instance();
 //static FileSystem& fileSystem=FileSystem::instance();
 
-File::File(unsigned int basePointer,size_t lenght){
+File::File(unsigned int basePointer,size_t lenght, uid_t uid, gid_t gid){
     this->lenght=lenght;
     this->basePointer=basePointer;
     this->fp=0;
+    this->uid=uid;
+    this->gid=gid;
 }
 ssize_t File::write(const void *buff,size_t count){
     unsigned int byteToWrite= (this->fp + count > this->lenght) ? lenght : count;
@@ -25,11 +27,19 @@ ssize_t File::read(void *buf,size_t count){
     memcpy((void *)buf,(void *)(this->basePointer + this->fp),i);
     return i;
 }
-/*
+
 int File::fstat(struct stat *buf){
-    FileSystem* a=FileSystem.getInstance();
-    return a->lstat();
-}*/
+    buf->st_nlink = 1;
+    memset(buf, 0, sizeof (struct stat));
+    buf->st_uid = this->uid;
+    buf->st_gid = this->gid;
+    buf->st_size = this->lenght;
+    buf->st_blksize = 512;
+    int blocks = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+    blocks = blocks * buf->st_blksize;
+    buf->st_blocks = blocks; //round up!!
+    return 0;
+}
 off_t File::lseek(off_t offset,int whence){
     if(whence==SEEK_SET){
         if(offset > this->lenght || offset<0 )

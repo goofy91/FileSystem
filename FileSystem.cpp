@@ -7,23 +7,12 @@
 #include "FileSystem.h";
 #include "util/util.h";
 #include <cstdio>
-#include <list>//TO DELETE
-
-#include "miosix.h"//TO DELETE
 
 static FlashDriver& fd = (FlashDriver::instance());
 
 FileSystem::FileSystem() {
 }
 
-bool FileSystem::checkBlank(unsigned int from, unsigned int to) {
-    while (from <= to) {
-        if (*((unsigned int *) from) != FS_BLANK)
-            return false;
-        from += sizeof (unsigned int);
-    }
-    return true;
-}
 
 bool FileSystem::isValid(unsigned int address) {
     return (*((char *) (address + sizeof (Header) - FS_FILE_NAME_MAX_LENGHT)) == 0x00 ? false : true);
@@ -64,7 +53,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             //now write it!
             if (writeHeader(address, newHeader) != sizeof (Header))//if writing fails
                 return NULL;
-            return new File(address + sizeof (Header), size);
+            return new File(address + sizeof (Header), size,newHeader.uid,newHeader.gid);
         } else {
             //NO! we have to find holes
             address = fd.getStartSector(); //set the address to the root of the FS
@@ -85,12 +74,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             //To ask generate seed number
 
             address = holes.at((int) (rand() % ((int) holes.capacity())));
-            iprintf("\n\naddress %x\n\n", address);
-            iprintf("\n\nsizeHole %x\n\n", sizeHole);
-            bool gg = isValid((unsigned int) 0x08080060);
-            if (gg == true)
-                iprintf("\nIsValid true \n");
-            iprintf("\nnewHeader.next %d\n", newHeader.next);
+            
             //save the sector where is the file to delete in a sector used as a buffer
             unsigned int i = 0;
             newHeader.next = readHeader(address).next;
@@ -169,7 +153,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 }
 
             }
-            return new File(address + sizeof (Header), size);
+            return new File(address + sizeof (Header), size,newHeader.uid,newHeader.gid);
 
         }
     } else if (flags == O_RDONLY) {//we have to read the file
@@ -178,7 +162,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
         if (address == FS_BLANK) {//if the filename doesn't exist
             return NULL;
         }
-        return new File(address + sizeof (Header), size);
+        return new File(address + sizeof (Header), size, readHeader(address).uid,readHeader(address).gid);
     }
     return NULL;
 }
@@ -256,8 +240,6 @@ void FileSystem::clearFS() {
 }
 
 FileSystem& FileSystem::instance() {
-    /*if(fs==0) fs=new FileSystem();
-return fs;*/
     static FileSystem singleton;
     return singleton;
 }

@@ -1,7 +1,6 @@
 /* 
  * File:   FlashDriver.h
- * Author: goofy
- *
+ * Author: Filippo Jacolino, Tommaso Innocenti, Fernando Faenza
  * Created on May 8, 2013, 8:41 AM
  */
 #ifndef FLASHDRIVER_H
@@ -48,11 +47,15 @@
 #define FLASH_KEY2 ((unsigned int) 0xCDEF89AB)
 
 #include "stddef.h";
-#include "FileSystem.h"
+
 class FlashDriver
 {
 
 public:
+    /**
+     * 
+     * @return an instance of the FlashDriver
+     */
     static FlashDriver& instance();
     /**
      * 
@@ -72,7 +75,19 @@ public:
      * @return true on success, false on failure
      */
     bool write(unsigned int address, unsigned int data);
+    /**
+     * Writes to the flash the given data
+     * @param address
+     * @param data
+     * @return true on success, false on failure
+     */
     bool write(unsigned int address, short data);
+   /**
+     * Writes to the flash the given data
+     * @param address
+     * @param data
+     * @return true on success, false on failure
+     */
     bool write(unsigned int address, char data);
 
     /**
@@ -96,7 +111,17 @@ public:
     unsigned int getBufferSector() { return ADDR_FLASH_SECTOR_11; }
 
 private:
+    /**
+     * Constructor
+     * 
+     */
     FlashDriver();
+    /**
+     * writes to the flash a byte of a given data
+     * @param address
+     * @param data
+     * @return true on success, false on failure
+     */
     bool programByte(unsigned int address,char data);
 
     /**

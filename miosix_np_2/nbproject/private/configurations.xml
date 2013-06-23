@@ -401,7 +401,6 @@
       </df>
       <in>Common.h</in>
       <in>File.cpp</in>
-      <in>File.h</in>
       <in>FileSystem.cpp</in>
       <in>FileSystem.h</in>
       <in>FlashDriver.cpp</in>
