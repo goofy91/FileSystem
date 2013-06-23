@@ -6,28 +6,26 @@
  */
 
 #ifndef FILE_H
-#define	FILE_H
-#include "FileSystem.h";
+#define	FILE_H/*
 #include "FlashDriver.h"
 #include <unistd.h>
 
 
 class File{
 public:
-    ssize_t write(int fd,const void *buff,size_t count);
-    ssize_t read(int fd, void *buf,size_t count);
-    int fstat(int fd,struct stat *buf);
-    off_t lseek(int fd,off_t offset,int whence);
+    ssize_t write(const void *buff,size_t count);
+    ssize_t read(void *buf,size_t count);
+    int fstat(struct stat *buf);
+    off_t lseek(off_t offset,int whence);
     unsigned int getBasePointer();
-    File(int basePointer,size_t lengh);
+    File(unsigned int basePointer,size_t lengh);
 
 private:
     unsigned int basePointer;
-    int fd;
+    int fp;
     size_t lenght;
-    Header header;
     
-};
+};*/
 
 #endif	/* FILE_H */
 

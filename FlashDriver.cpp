@@ -74,6 +74,12 @@ bool FlashDriver::erase()
 }
 
 bool FlashDriver::write(unsigned int address, char *data, size_t count){
+    /*
+    for(int i=0;i<count;i++){
+        if(fd.write(address+i,(short)(data[i] | (data[++i] <<8)))==false)
+            return false;
+    }*/
+    
     for(int i=0;i<count;i++){
         if(*(data+i)!=0xFF){//if it's clear don't write
             if(write(address+i,*(data+i))==false)
@@ -151,45 +157,45 @@ bool FlashDriver::write(unsigned int address, short data){
 }
 bool FlashDriver::programByte(unsigned int address, char data)
 {
-    InterruptDisableLock dLock; //disable all the interrupts
-    unlock();
-    if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
-    if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
-    FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
-    FLASH->CR |=FLASH_PSIZE_BYTE | FLASH_CR_PG;
-    *( char*)address=data;
-    while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
-    FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
-    lock();
+        InterruptDisableLock dLock; //disable all the interrupts
+        unlock();
+        if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
+        if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
+        FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
+        FLASH->CR |=FLASH_PSIZE_BYTE | FLASH_CR_PG;
+        *( char*)address=data;
+        while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
+        FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
+        lock();
     return true;
 }
 bool FlashDriver::programWord(unsigned int address, unsigned int data)
 {
-    InterruptDisableLock dLock; //disable all the interrupts
-    unlock();
-    if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
-    if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
-    FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
-    FLASH->CR |=FLASH_PSIZE_WORD | FLASH_CR_PG;
-    *( int*)address=data;
-    while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
-    FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
-    lock();
+        InterruptDisableLock dLock; //disable all the interrupts
+        unlock();
+        if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
+        if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
+        FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
+        FLASH->CR |=FLASH_PSIZE_WORD | FLASH_CR_PG;
+        *( int*)address=data;
+        while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
+        FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
+        lock();
     return true;
 }
 
 bool FlashDriver::programHalfWord(unsigned int address, short data)
 {
-    InterruptDisableLock dLock; //disable all the interrupts
-    unlock();
-    if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
-    if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
-    FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
-    FLASH->CR |=FLASH_PSIZE_HALF_WORD | FLASH_CR_PG;
-    *(short*)address=data;
-    while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
-    FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
-    lock();
+        InterruptDisableLock dLock; //disable all the interrupts
+        unlock();
+        if(FLASH->CR & FLASH_CR_LOCK) return false; //Flash is still locked
+        if(FLASH->SR & FLASH_SR_BSY) return false;//Flash is busy
+        FLASH->CR &=~(FLASH_CR_PSIZE_0 | FLASH_CR_PSIZE_1);//clear the psize bits
+        FLASH->CR |=FLASH_PSIZE_HALF_WORD | FLASH_CR_PG;
+        *(short*)address=data;
+        while(FLASH->SR & FLASH_SR_BSY);//wait the BSY bit to be cleared
+        FLASH->CR &=~FLASH_CR_PG;//clear the PG bit
+        lock();
     return true;
 }
 
