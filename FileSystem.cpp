@@ -29,6 +29,9 @@ File* FileSystem::open(const char* filename, int flags, int size) {
     if (filename[0] == 0x00) {//invalid first character
         return NULL;
     }
+    if(size<0){//invalid size
+        return NULL;
+    }
     if (flags == (O_CREAT | O_WRONLY)) {//create and write
         int i;
         Header newHeader;
@@ -36,7 +39,8 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             newHeader.filename[i] = filename[i];
         for (; i < FS_FILE_NAME_MAX_LENGHT; i++)
             newHeader.filename[i] = '\0';
-        newHeader.next = size + (sizeof(Header) - (size % sizeof(Header))) + sizeof (Header);
+        newHeader.next = sizeof(Header)*((size + sizeof(Header) - 1)/sizeof(Header) ) + sizeof(Header); //round up to the sizeof(Header)
+        newHeader.size=size;
         newHeader.uid = getuid();
         newHeader.gid = getgid();
         unsigned int address = fd.getStartSector(); //set the address to the root of the FS
@@ -51,7 +55,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             //YES! there's space
             newHeader.next += address;
             //now write it!
-            if (writeHeader(address, newHeader) != sizeof (Header))//if writing fails
+            if (writeHeader(address, newHeader) ==false)//if writing fails
                 return NULL;
             return new File(address + sizeof (Header), size,newHeader.uid,newHeader.gid);
         } else {
@@ -59,7 +63,16 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             address = fd.getStartSector(); //set the address to the root of the FS
             unsigned int sizeHole = 0;
             std::vector<unsigned int> holes;
-            while ((*(unsigned int *) address) != FS_BLANK && address < fd.getLastAddress()) {
+           /* while ((*(unsigned int *) address) != FS_BLANK && address < fd.getLastAddress()) {
+                if (isValid(address) == false) {//if it's a whole!
+                    sizeHole = (*(unsigned int *) address) - address;
+                    if (sizeHole >= newHeader.next && address + sizeHole < fd.getLastAddress()) { // if there's enough space
+                        holes.push_back(address);
+                    }
+                }
+                address = *(unsigned int *) address;
+            }*/
+            do{
                 if (isValid(address) == false) {//if it's a whole!
                     sizeHole = (*(unsigned int *) address) - address;
                     if (sizeHole >= newHeader.next && address + sizeHole < fd.getLastAddress()) { // if there's enough space
@@ -68,12 +81,16 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 }
                 address = *(unsigned int *) address;
             }
+            while(address != FS_BLANK && address < fd.getLastAddress());
             //finish scanning the FS. 
+            
+            if(holes.size()==0)//if no holes, there's no space!
+                return NULL;
             //All the possible holes are saved, now flip a coin to insert the file in a random holes
 
             //To ask generate seed number
 
-            address = holes.at((int) (rand() % ((int) holes.capacity())));
+            address = holes.at((int) (rand() % ((int) holes.size())));
             
             //save the sector where is the file to delete in a sector used as a buffer
             unsigned int i = 0;
@@ -87,7 +104,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 while (i < SECTOR_SIZE) {
                     if (i + (address & ADDR_FLASH_SECTOR_MASK) == address) {
                         //write the new header
-                        if (writeHeader(fd.getBufferSector() + i, newHeader) != sizeof (Header)) {
+                        if (writeHeader(fd.getBufferSector() + i, newHeader)== false) {
                             return NULL;
                         }
                         i = newHeader.next - (address & ADDR_FLASH_SECTOR_MASK);
@@ -153,7 +170,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 }
 
             }
-            return new File(address + sizeof (Header), size,newHeader.uid,newHeader.gid);
+            return new File(address + sizeof (Header), size ,newHeader.uid,newHeader.gid);
 
         }
     } else if (flags == O_RDONLY) {//we have to read the file
@@ -162,7 +179,8 @@ File* FileSystem::open(const char* filename, int flags, int size) {
         if (address == FS_BLANK) {//if the filename doesn't exist
             return NULL;
         }
-        return new File(address + sizeof (Header), size, readHeader(address).uid,readHeader(address).gid);
+        Header header=readHeader(address);
+        return new File(address + sizeof (Header), header.size , header.uid,header.gid);
     }
     return NULL;
 }
@@ -193,19 +211,18 @@ int FileSystem::lstat(char* filename, struct stat* buf) {
 bool FileSystem::writeHeader(unsigned int address, Header header) {
     if (fd.write(address, header.next) == false)
         return false;
-    address = offsetof(Header, next);
+    address +=sizeof(header.next);
     if (fd.write(address, header.size) == false)
         return false;
-    address = offsetof(Header, size);
+    address +=sizeof(header.size);
     if (fd.write(address, (short) header.uid) == false)
         return false;
-    address = offsetof(Header, uid);
+    address += sizeof(header.uid);
     if (fd.write(address, (short) header.gid) == false)
         return false;
-    address = offsetof(Header, gid);
+    address +=sizeof(header.gid);
     if (fd.write(address, header.filename, FS_FILE_NAME_MAX_LENGHT) == false)
         return false;
-    address = offsetof(Header, filename);
     return true;
 }
 
@@ -245,8 +262,8 @@ FileSystem& FileSystem::instance() {
 }
 
 unsigned int FileSystem::getAddress(const char* filename) {
-    Header header;
-    if (*(unsigned int *) (fd.getStartSector()) == FS_BLANK)//if there's no root!
+    /*Header header;
+    if (*(unsigned int *) (fd.getStartSector()) == FS_BLANK)
         return FS_BLANK;
     unsigned int address = *(unsigned int *) (fd.getStartSector());
     do {
@@ -255,6 +272,15 @@ unsigned int FileSystem::getAddress(const char* filename) {
             return address;
         address = (header.next);
     } while (address != FS_BLANK);
+    return FS_BLANK;*/
+    unsigned int address = fd.getStartSector(); //set the address to the root of the FS
+    Header header;
+    while (address != FS_BLANK && address < fd.getLastAddress()) {
+        header = readHeader(address);
+        if (strcmp(filename, header.filename) == 0)
+            return address;
+        address = header.next;
+    }
     return FS_BLANK;
 }
 
@@ -264,11 +290,11 @@ int FileSystem::unlink(const char* filename) {
         return -ENOENT;
     }
     //check the file if exist!
-    if (findFile(filename) == false) {//if the filename doesn't exist
+        unsigned int address = getAddress(filename);
+    if (address == FS_BLANK) {//if the filename doesn't exist
         return -ENOENT;
     }
     //erase it by writing 0x00 in the first char of the filename
-    unsigned int address = getAddress(filename);
     Header header = readHeader(address);
     if (fd.write(address + sizeof (Header) - FS_FILE_NAME_MAX_LENGHT, (char) 0x00) == false)
         return -EIO;
@@ -282,7 +308,7 @@ int FileSystem::unlink(const char* filename) {
 bool FileSystem::findFile(const char *filename) {
     unsigned int address = fd.getStartSector(); //set the address to the root of the FS
     Header header;
-    while (*(unsigned int *) address != FS_BLANK && address < fd.getLastAddress()) {
+    while (address != FS_BLANK && address < fd.getLastAddress()) {
         header = readHeader(address);
         if (strcmp(filename, header.filename) == 0)
             return true;

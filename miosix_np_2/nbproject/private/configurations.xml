@@ -2,6 +2,16 @@
 <configurationDescriptor version="88">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root=".." name="miosix_np_2">
+      <df name="html">
+        <df name="search">
+        </df>
+      </df>
+      <df name="latex">
+      </df>
+      <df name="man">
+        <df name="man3">
+        </df>
+      </df>
       <df name="miosix">
         <df name="arch">
           <df name="arm7_lpc2000">
@@ -398,6 +408,10 @@
         <in>miosix.h</in>
       </df>
       <df name="miosix_np_2">
+        <df name="man">
+          <df name="man3">
+          </df>
+        </df>
       </df>
       <in>Common.h</in>
       <in>File.cpp</in>

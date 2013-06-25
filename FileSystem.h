@@ -67,7 +67,11 @@ public:
      * @return a pointer to the first byte of the file
      */
     unsigned int getBasePointer();
-protected:
+    /**
+     * 
+     * @return the size of the file 
+     */
+    size_t getSize();
     /**
      * Constructor
      * @param basePointer

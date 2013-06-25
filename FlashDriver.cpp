@@ -13,19 +13,6 @@ FlashDriver::FlashDriver()
 {
     
 }
-/* Fatta dal prof
-bool FlashDriver::erase(int sector)
-{
-    InterruptDisableLock dLock;
-    FLASH->OPTKEYR = 0x08192A3B;
-    FLASH->OPTKEYR = 0x4C5D6E7F;
-    if(FLASH->CR & FLASH_CR_LOCK) return false;
-    FLASH->CR = sector<<3 | FLASH_CR_SER | FLASH_CR_STRT;
-    while(FLASH->SR & FLASH_SR_BSY) ;
-    FLASH->CR |= FLASH_CR_LOCK;
-    return true;
-}
-*/
 
 void FlashDriver::lock()
 {
@@ -74,11 +61,6 @@ bool FlashDriver::erase()
 }
 
 bool FlashDriver::write(unsigned int address, char *data, size_t count){
-    /*
-    for(int i=0;i<count;i++){
-        if(fd.write(address+i,(short)(data[i] | (data[++i] <<8)))==false)
-            return false;
-    }*/
     
     for(int i=0;i<count;i++){
         if(*(data+i)!=0xFF){//if it's clear don't write

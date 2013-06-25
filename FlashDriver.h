@@ -47,6 +47,7 @@
 #define FLASH_KEY2 ((unsigned int) 0xCDEF89AB)
 
 #include "stddef.h";
+#include "FileSystem.h"
 
 class FlashDriver
 {
@@ -106,10 +107,10 @@ public:
             
     unsigned int getStartSector() { return ADDR_FLASH_SECTOR_8; }
     
-    unsigned int getLastAddress() { return 0x080800a0;}//return ADDR_FLASH_SECTOR_11 - ALIGMENT; }
+    unsigned int getLastAddress() { return ADDR_FLASH_SECTOR_11 - sizeof(Header); }
     
     unsigned int getBufferSector() { return ADDR_FLASH_SECTOR_11; }
-
+ 
 private:
     /**
      * Constructor

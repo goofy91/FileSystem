@@ -14,17 +14,20 @@ ssize_t File::write(const void *buff,size_t count){
     unsigned int byteToWrite= (this->fp + count > this->lenght) ? lenght : count;
     if(flashDriver.write(this->fp+this->basePointer,(char *)buff,byteToWrite)==false)
         return -EIO;
+    this->fp +=byteToWrite;
     return byteToWrite;
 }
 unsigned int File::getBasePointer(){
     return this->basePointer;
 }
-
+size_t File::getSize(){
+    return this->lenght;
+}
 ssize_t File::read(void *buf,size_t count){
     int i=0;
-    //TODO CHECK THE COUNT!!!!!!
     i= (this->fp + count >this-> lenght) ? lenght : count;
     memcpy((void *)buf,(void *)(this->basePointer + this->fp),i);
+    this->fp+=i;
     return i;
 }
 
