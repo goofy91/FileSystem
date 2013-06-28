@@ -103,12 +103,29 @@ public:
      * @return the address of the num-sector, 0xFFFFFFFF if the num-sector doesn't exist
      */
     unsigned int getSectorAddress(int num);
-        bool write(unsigned int address, char *data, size_t count);
+    /**
+     * Writes count bytes to a buffer (data) in the given address
+     * @param address where to writes
+     * @param data buffer
+     * @param count how many bytes to write
+     * @return 
+     */    
+    bool write(unsigned int address, char *data, size_t count);
             
+    /**
+     * 
+     * @return the first sector of the FS 
+     */
     unsigned int getStartSector() { return ADDR_FLASH_SECTOR_8; }
-    
+    /**
+     * 
+     * @return the last address of the FS 
+     */
     unsigned int getLastAddress() { return ADDR_FLASH_SECTOR_11 - sizeof(Header); }
-    
+    /**
+     * 
+     * @return the sector used as a buffer 
+     */
     unsigned int getBufferSector() { return ADDR_FLASH_SECTOR_11; }
  
 private:
