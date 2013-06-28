@@ -40,6 +40,8 @@
             <df name="drivers">
               <in>dcc.cpp</in>
               <in>dcc.h</in>
+              <in>stm32_hardware_rng.cpp</in>
+              <in>stm32_hardware_rng.h</in>
             </df>
           </df>
           <df name="cortexM3_stm32">
@@ -394,9 +396,13 @@
         <in>miosix.h</in>
       </df>
       <in>Common.h</in>
+      <in>File.cpp</in>
       <in>FileSystem.cpp</in>
       <in>FileSystem.h</in>
+      <in>FlashDriver.cpp</in>
+      <in>FlashDriver.h</in>
       <in>main.cpp</in>
+      <in>main.old.cpp</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -464,11 +470,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -566,6 +580,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -1532,11 +1556,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -1634,6 +1666,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -2602,11 +2644,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -2704,6 +2754,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -3672,11 +3732,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -3774,6 +3842,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -4742,11 +4820,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -4844,6 +4930,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -5812,11 +5908,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -5914,6 +6018,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -6882,11 +6996,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -6984,6 +7106,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -7950,11 +8082,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -8052,6 +8192,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -9018,11 +9168,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -9120,6 +9278,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -10086,11 +10254,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -10188,6 +10364,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -11154,11 +11340,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -11256,6 +11450,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -12222,11 +12426,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -12324,6 +12536,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -13290,11 +13512,19 @@
       </makefileType>
       <item path="../Common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../FileSystem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../FileSystem.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../FlashDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../FlashDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../main.old.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../miosix/arch/arm7_lpc2000/common/arch_settings.h"
             ex="false"
@@ -13392,6 +13622,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/stm32_hardware_rng.h"
             ex="false"
             tool="3"
             flavor2="0">

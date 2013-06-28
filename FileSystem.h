@@ -124,6 +124,14 @@ public:
      * @return the instance of the FileSystem 
      */
     static FileSystem& instance();
+    
+    /**
+     * Writes the header passed as a parameter to the address
+     * @param address where write the header
+     * @param header to be written
+     * @return true on success false on failure
+     */
+    bool writeHeader(unsigned int address,Header header);
 
 private:
     /**
@@ -143,12 +151,22 @@ private:
     bool findFile(const char *filename);
 
     /**
-     * Writes the header passed as a parameter to the address
-     * @param address where write the header
-     * @param header to be written
-     * @return true on success false on failure
+     * Writes the header passed as a parameter to the address and restore the sectors from address to header.next
+     * @param address
+     * @param header
+     * @return 
      */
-    bool writeHeader(unsigned int address,Header header);
+    bool writeHeaderRestoringSectors(unsigned int address,Header header);
+    
+    /**
+     * Writes the header passed as a parameter to the address and restore the sectors from address to header.next
+     * and then it writes a falseHeader upon the header.next address
+     * @param address
+     * @param header
+     * @param falseHeader
+     * @return 
+     */
+    bool writeHeaderRestoringSectors(unsigned int address,Header header,Header falseHeader);
     /**
      * getAddress() gets the address of a given file name
      * @param filename to find

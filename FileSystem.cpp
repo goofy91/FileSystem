@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "FileSystem.h";
 #include "util/util.h";
+#include "drivers/stm32_hardware_rng.h"
 #include <cstdio>
 
 static FlashDriver& fd = (FlashDriver::instance());
@@ -13,12 +14,8 @@ static FlashDriver& fd = (FlashDriver::instance());
 FileSystem::FileSystem() {
 }
 
-
 bool FileSystem::isValid(unsigned int address) {
     return (*((char *) (address + sizeof (Header) - FS_FILE_NAME_MAX_LENGHT)) == 0x00 ? false : true);
-    /*  if(readHeader(address).filename[0]==0x00)
-          return false;
-      return true;*/
 }
 
 File* FileSystem::open(const char* filename, int flags, int size) {
@@ -29,7 +26,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
     if (filename[0] == 0x00) {//invalid first character
         return NULL;
     }
-    if(size<0){//invalid size
+    if (size < 0) {//invalid size
         return NULL;
     }
     if (flags == (O_CREAT | O_WRONLY)) {//create and write
@@ -39,8 +36,8 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             newHeader.filename[i] = filename[i];
         for (; i < FS_FILE_NAME_MAX_LENGHT; i++)
             newHeader.filename[i] = '\0';
-        newHeader.next = sizeof(Header)*((size + sizeof(Header) - 1)/sizeof(Header) ) + sizeof(Header); //round up to the sizeof(Header)
-        newHeader.size=size;
+        newHeader.next = sizeof (Header)*((size + sizeof (Header) - 1) / sizeof (Header)) + 2 * sizeof (Header); //round up to the sizeof(Header)
+        newHeader.size = size;
         newHeader.uid = getuid();
         newHeader.gid = getgid();
         unsigned int address = fd.getStartSector(); //set the address to the root of the FS
@@ -55,122 +52,71 @@ File* FileSystem::open(const char* filename, int flags, int size) {
             //YES! there's space
             newHeader.next += address;
             //now write it!
-            if (writeHeader(address, newHeader) ==false)//if writing fails
+            if (writeHeader(address, newHeader) == false)//if writing fails
                 return NULL;
-            return new File(address + sizeof (Header), size,newHeader.uid,newHeader.gid);
+            return new File(address + sizeof (Header), size, newHeader.uid, newHeader.gid);
         } else {
             //NO! we have to find holes
             address = fd.getStartSector(); //set the address to the root of the FS
             unsigned int sizeHole = 0;
             std::vector<unsigned int> holes;
-           /* while ((*(unsigned int *) address) != FS_BLANK && address < fd.getLastAddress()) {
-                if (isValid(address) == false) {//if it's a whole!
-                    sizeHole = (*(unsigned int *) address) - address;
+            unsigned int ptrEndHole = 0;
+            do {
+                if (isValid(address) == false) {//if it's a hole!
+                    ptrEndHole = address;
+                    sizeHole = *(unsigned int*) address - address;
+                    while (ptrEndHole != FS_BLANK && isValid(ptrEndHole) == false && sizeHole < newHeader.next && ptrEndHole < fd.getLastAddress()) {
+                        ptrEndHole = *(unsigned int *) ptrEndHole;
+                        sizeHole = ptrEndHole - address;
+                    }
                     if (sizeHole >= newHeader.next && address + sizeHole < fd.getLastAddress()) { // if there's enough space
                         holes.push_back(address);
+                    } else {
+                        sizeHole = 0;
+                        address = *(unsigned int *) address;
                     }
+                    address += sizeHole;
                 }
                 address = *(unsigned int *) address;
-            }*/
-            do{
-                if (isValid(address) == false) {//if it's a whole!
-                    sizeHole = (*(unsigned int *) address) - address;
-                    if (sizeHole >= newHeader.next && address + sizeHole < fd.getLastAddress()) { // if there's enough space
-                        holes.push_back(address);
-                    }
-                }
-                address = *(unsigned int *) address;
-            }
-            while(address != FS_BLANK && address < fd.getLastAddress());
-            //finish scanning the FS. 
-            
-            if(holes.size()==0)//if no holes, there's no space!
+
+            } while (address != FS_BLANK && address < fd.getLastAddress());
+            //finish scanning the FS.
+            if (holes.size() == 0)//if no holes, there's no space!
                 return NULL;
             //All the possible holes are saved, now flip a coin to insert the file in a random holes
-
-            //To ask generate seed number
-
-            address = holes.at((int) (rand() % ((int) holes.size())));
-            
-            //save the sector where is the file to delete in a sector used as a buffer
-            unsigned int i = 0;
-            newHeader.next = readHeader(address).next;
-
-            if (fd.erase(FS_SECTOR_BUFFER) == false) {
-                return NULL;
-            }
-            if ((address & ADDR_FLASH_SECTOR_MASK) == ((newHeader.next) & ADDR_FLASH_SECTOR_MASK)) {
-                //the whole file to open is in the same sector
-                while (i < SECTOR_SIZE) {
-                    if (i + (address & ADDR_FLASH_SECTOR_MASK) == address) {
-                        //write the new header
-                        if (writeHeader(fd.getBufferSector() + i, newHeader)== false) {
-                            return NULL;
-                        }
-                        i = newHeader.next - (address & ADDR_FLASH_SECTOR_MASK);
-                    } else {
-                        if (fd.write(fd.getBufferSector() + i, *(unsigned int *) (i + (address & ADDR_FLASH_SECTOR_MASK))) == false) {
-                            return NULL;
-                        }
-                        i += ALIGMENT;
-                    }
-                }
-
-                //erase the sector:
-                if (fd.erase(fd.getSectorNumber(address)) == false) {
+            address = holes.at(((HardwareRng::instance()).get() & 0x7FFFFFFF) % holes.size());
+            holes.~vector(); //Destructor call
+            //now find the size of the hole
+            ptrEndHole = address;
+            do {
+                ptrEndHole = *(unsigned int *) ptrEndHole;
+                sizeHole = ptrEndHole - address;
+            } while (sizeHole < newHeader.next);
+            if (sizeHole == newHeader.next) {
+                //i don't have to merge file
+                newHeader.next = readHeader(address).next;
+                if (writeHeaderRestoringSectors(address, newHeader) == false)
                     return NULL;
-                }
-                //and then copy it back!
-                if (fd.write(address & ADDR_FLASH_SECTOR_MASK, (char *) (fd.getBufferSector()), SECTOR_SIZE) == false) {
+            } else if (sizeHole > newHeader.next && sizeHole == (*(unsigned int *) address - address)) {
+                //I have to split!
+                Header falseHeader;
+                falseHeader.size = 0;
+                falseHeader.filename[0] = 0;
+                falseHeader.next = readHeader(address).next;
+                newHeader.next += address;
+                if (writeHeaderRestoringSectors(address, newHeader, falseHeader) == false)
                     return NULL;
-                }
             } else {
-                //the file to open is between two sectors
-                while (i < SECTOR_SIZE) {
-                    if (i + (address & ADDR_FLASH_SECTOR_MASK) == address) {
-                        //write the new header
-                        if((writeHeader(fd.getBufferSector() + i, newHeader))==false)
-                            return NULL;
-                        break;
-                    } else {
-                        if (fd.write(fd.getBufferSector() + i, *(unsigned int *) (i + (address & ADDR_FLASH_SECTOR_MASK))) == false) {
-                            return NULL;
-                        }
-                        i += ALIGMENT;
-                    }
-                }
-                //erase the sector:
-                if (fd.erase(fd.getSectorNumber(address)) == false) {
+                //i Have to merge!
+                Header falseHeader;
+                falseHeader.size = 0;
+                falseHeader.filename[0] = 0;
+                falseHeader.next = ptrEndHole;
+                newHeader.next += address;
+                if (writeHeaderRestoringSectors(address, newHeader, falseHeader) == false)
                     return NULL;
-                }
-                //and then copy it back!
-                if (fd.write(address & ADDR_FLASH_SECTOR_MASK, (char *) (fd.getBufferSector()), SECTOR_SIZE) == false) {
-                    return NULL;
-                }
-
-                //erase the buffer
-                if (fd.erase(FS_SECTOR_BUFFER) == false) {
-                    return NULL;
-                }
-                //if all the header is in the buffer
-                //copy the other sector in the buffer starting from newHeader.next
-                if (fd.write(fd.getBufferSector()+(newHeader.next - (newHeader.next & ADDR_FLASH_SECTOR_MASK)),
-                        (char *) (newHeader.next),
-                        SECTOR_SIZE - (newHeader.next - (newHeader.next & ADDR_FLASH_SECTOR_MASK))) == false) {
-                    return NULL;
-                }
-
-                //erase the sector:
-                if (fd.erase(fd.getSectorNumber(newHeader.next)) == false) {
-                    return NULL;
-                }
-                //then copy it back:
-                if (fd.write(newHeader.next & ADDR_FLASH_SECTOR_MASK, (char *) (fd.getBufferSector()), SECTOR_SIZE) == false) {
-                    return NULL;
-                }
-
             }
-            return new File(address + sizeof (Header), size ,newHeader.uid,newHeader.gid);
+            return new File(address + sizeof (Header), size, newHeader.uid, newHeader.gid);
 
         }
     } else if (flags == O_RDONLY) {//we have to read the file
@@ -179,10 +125,91 @@ File* FileSystem::open(const char* filename, int flags, int size) {
         if (address == FS_BLANK) {//if the filename doesn't exist
             return NULL;
         }
-        Header header=readHeader(address);
-        return new File(address + sizeof (Header), header.size , header.uid,header.gid);
+        Header header = readHeader(address);
+        return new File(address + sizeof (Header), header.size, header.uid, header.gid);
     }
     return NULL;
+}
+
+bool FileSystem::writeHeaderRestoringSectors(unsigned int address, Header header, Header falseHeader) {
+
+    unsigned int i = address & ADDR_FLASH_SECTOR_MASK;
+    unsigned int currentSector = i;
+    while (i <= (falseHeader.next & ADDR_FLASH_SECTOR_MASK)) {
+        if (fd.erase(FS_SECTOR_BUFFER) == false) {
+            return false;
+        }
+        while ((i & ADDR_FLASH_SECTOR_MASK) == currentSector) {
+            if (i == address) {
+                //write the new header
+                if (writeHeader(fd.getBufferSector() + (i - (i & ADDR_FLASH_SECTOR_MASK)), header) == false) {
+                    return false;
+                }
+                i = header.next;
+            } else if (i == header.next) {
+                if (writeHeader(fd.getBufferSector() + (i - (i & ADDR_FLASH_SECTOR_MASK)), falseHeader) == false) {
+                    return false;
+                }
+                i = falseHeader.next;
+            } else {
+                if (fd.write(fd.getBufferSector() + (i - (i & ADDR_FLASH_SECTOR_MASK)), *(unsigned int *) i) == false)
+                    return false;
+                i += ALIGMENT;
+            }
+        }
+
+        //erase the sector:
+        if (fd.erase(fd.getSectorNumber(currentSector)) == false) {
+            return false;
+        }
+        //and then copy it back!
+        if (fd.write(currentSector & ADDR_FLASH_SECTOR_MASK, (char *) (fd.getBufferSector()), SECTOR_SIZE) == false) {
+            return false;
+        }
+        currentSector += SECTOR_SIZE;
+        i = currentSector;
+
+    }
+    return true;
+
+
+}
+
+bool FileSystem::writeHeaderRestoringSectors(unsigned int address, Header header) {
+
+    unsigned int i = address & ADDR_FLASH_SECTOR_MASK;
+    unsigned int currentSector = i;
+    while (i <= (header.next & ADDR_FLASH_SECTOR_MASK)) {
+        if (fd.erase(FS_SECTOR_BUFFER) == false) {
+            return false;
+        }
+        while ((i & ADDR_FLASH_SECTOR_MASK) == currentSector) {
+            if (i == address) {
+                //write the new header
+                if (writeHeader(fd.getBufferSector() + (i - (i & ADDR_FLASH_SECTOR_MASK)), header) == false) {
+                    return false;
+                }
+                i = header.next;
+            } else {
+                if (fd.write(fd.getBufferSector() + (i - (i & ADDR_FLASH_SECTOR_MASK)), *(unsigned int *) i) == false)
+                    return false;
+                i += ALIGMENT;
+            }
+        }
+
+        //erase the sector:
+        if (fd.erase(fd.getSectorNumber(currentSector)) == false) {
+            return false;
+        }
+        //and then copy it back!
+        if (fd.write(currentSector & ADDR_FLASH_SECTOR_MASK, (char *) (fd.getBufferSector()), SECTOR_SIZE) == false) {
+            return false;
+        }
+        currentSector += SECTOR_SIZE;
+        i = currentSector;
+
+    }
+    return true;
 }
 
 int FileSystem::lstat(char* filename, struct stat* buf) {
@@ -211,16 +238,16 @@ int FileSystem::lstat(char* filename, struct stat* buf) {
 bool FileSystem::writeHeader(unsigned int address, Header header) {
     if (fd.write(address, header.next) == false)
         return false;
-    address +=sizeof(header.next);
+    address += sizeof (header.next);
     if (fd.write(address, header.size) == false)
         return false;
-    address +=sizeof(header.size);
+    address += sizeof (header.size);
     if (fd.write(address, (short) header.uid) == false)
         return false;
-    address += sizeof(header.uid);
+    address += sizeof (header.uid);
     if (fd.write(address, (short) header.gid) == false)
         return false;
-    address +=sizeof(header.gid);
+    address += sizeof (header.gid);
     if (fd.write(address, header.filename, FS_FILE_NAME_MAX_LENGHT) == false)
         return false;
     return true;
@@ -262,17 +289,6 @@ FileSystem& FileSystem::instance() {
 }
 
 unsigned int FileSystem::getAddress(const char* filename) {
-    /*Header header;
-    if (*(unsigned int *) (fd.getStartSector()) == FS_BLANK)
-        return FS_BLANK;
-    unsigned int address = *(unsigned int *) (fd.getStartSector());
-    do {
-        header = readHeader(address); //header of the first file
-        if (strcmp(filename, header.filename) == 0)
-            return address;
-        address = (header.next);
-    } while (address != FS_BLANK);
-    return FS_BLANK;*/
     unsigned int address = fd.getStartSector(); //set the address to the root of the FS
     Header header;
     while (address != FS_BLANK && address < fd.getLastAddress()) {
@@ -290,7 +306,7 @@ int FileSystem::unlink(const char* filename) {
         return -ENOENT;
     }
     //check the file if exist!
-        unsigned int address = getAddress(filename);
+    unsigned int address = getAddress(filename);
     if (address == FS_BLANK) {//if the filename doesn't exist
         return -ENOENT;
     }
