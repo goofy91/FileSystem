@@ -92,7 +92,7 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 ptrEndHole = *(unsigned int *) ptrEndHole;
                 sizeHole = ptrEndHole - address;
             } while (sizeHole < newHeader.next);
-            if (sizeHole == newHeader.next) {
+            if (ptrEndHole==readHeader(address).next && sizeHole == newHeader.next) {
                 //i don't have to merge file
                 newHeader.next = readHeader(address).next;
                 if (writeHeaderRestoringSectors(address, newHeader) == false)
@@ -113,8 +113,15 @@ File* FileSystem::open(const char* filename, int flags, int size) {
                 falseHeader.filename[0] = 0;
                 falseHeader.next = ptrEndHole;
                 newHeader.next += address;
-                if (writeHeaderRestoringSectors(address, newHeader, falseHeader) == false)
-                    return NULL;
+                if(isValid(newHeader.next)){
+                    //same size so don't have to insert a falseHeader
+                    if(writeHeaderRestoringSectors(address,newHeader)==false)
+                        return NULL;
+                }
+                else{
+                    if (writeHeaderRestoringSectors(address, newHeader, falseHeader) == false)
+                        return NULL;
+                }
             }
             return new File(address + sizeof (Header), size, newHeader.uid, newHeader.gid);
 
